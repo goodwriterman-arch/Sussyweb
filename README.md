@@ -1,0 +1,484 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CollegeCircle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: auth gate first, then a sticky tab bar (Home, Communities, Events, About) with the account at far right; content in a 1120px column. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#12201C; --muted:#56675F; --line:#D8E1DD;
+  --accent:#0B7A6B; --accent-ink:#FFFFFF; --accent-soft:#DCF0EA;
+  --warm:#B83C0A; --warm-soft:#FCE8DC; --danger:#B42318;
+  --head:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"DM Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1412; --surface:#152120; --ink:#E7F0ED; --muted:#95AAA3; --line:#26352F;
+  --accent:#3CC7B1; --accent-ink:#06201B; --accent-soft:#143A34; --warm:#FF9E69; --warm-soft:#3A2418; --danger:#FF8A7A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1412; --surface:#152120; --ink:#E7F0ED; --muted:#95AAA3; --line:#26352F;
+  --accent:#3CC7B1; --accent-ink:#06201B; --accent-soft:#143A34; --warm:#FF9E69; --warm-soft:#3A2418; --danger:#FF8A7A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+h1,h2,h3{font-family:var(--head);line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);
+  padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:500;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn[disabled]{opacity:.6;cursor:default}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;letter-spacing:.02em}
+.pill.pub{background:var(--accent-soft);color:var(--accent)}
+.pill.priv{background:var(--warm-soft);color:var(--warm)}
+.muted{color:var(--muted)}
+.label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--head);font-weight:700;font-size:20px;text-decoration:none}
+.logo svg{width:30px;height:30px;flex:none}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:24px;height:60px}
+nav.tabs{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto}
+nav.tabs a{padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:500;color:var(--muted);white-space:nowrap}
+nav.tabs a:hover{color:var(--ink)}
+nav.tabs a.on{color:var(--accent);background:var(--accent-soft)}
+.acct{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px 4px 4px;cursor:pointer;text-decoration:none;font-weight:500}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+@media(max-width:640px){.bar{gap:10px}.logo span{display:none}.acct b{display:none}.acct{padding:4px}}
+
+main{padding-block:32px 64px}
+section.blk{margin-top:48px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.sec-h h2{font-size:24px}
+
+/* auth */
+.auth{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;max-width:1040px;margin:0 auto;padding-block:40px}
+.auth .pitch h1{font-size:clamp(34px,5vw,54px);margin:22px 0 14px}
+.auth .pitch p{color:var(--muted);max-width:42ch;font-size:17px}
+.circles-art{margin-top:28px;display:flex}
+.circles-art i{width:64px;height:64px;border-radius:50%;border:2px solid var(--accent);margin-left:-14px;background:var(--accent-soft);opacity:.95}
+.circles-art i:first-child{margin-left:0}.circles-art i:nth-child(2){background:var(--warm-soft);border-color:var(--warm)}.circles-art i:nth-child(3){background:var(--surface)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:22px}
+.seg button{border:0;background:none;padding:9px;border-radius:7px;cursor:pointer;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:13px;font-weight:700}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.err{color:var(--danger);font-size:13px;min-height:20px;margin-bottom:6px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+@media(max-width:820px){.auth{grid-template-columns:1fr;gap:24px;min-height:0}.row2{grid-template-columns:1fr}}
+
+/* home */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center}
+.hero h1{font-size:clamp(34px,5.4vw,58px)}
+.hero p.lead{font-size:18px;color:var(--muted);margin:16px 0 24px;max-width:50ch}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.stats b{display:block;font-family:var(--head);font-size:28px}
+.stats span{font-size:13px;color:var(--muted)}
+.venn{position:relative;aspect-ratio:1;max-width:340px;width:100%;margin:0 auto}
+.venn div{position:absolute;border-radius:50%;display:grid;place-items:center;font-weight:700;text-align:center;font-size:14px;padding:10px}
+.venn .a{width:62%;height:62%;left:0;top:6%;background:var(--accent-soft);border:2px solid var(--accent);color:var(--accent)}
+.venn .b{width:56%;height:56%;right:0;top:0;background:var(--warm-soft);border:2px solid var(--warm);color:var(--warm)}
+.venn .c{width:52%;height:52%;left:24%;bottom:0;background:var(--surface);border:2px solid var(--ink)}
+@media(max-width:820px){.hero{grid-template-columns:1fr}.venn{max-width:240px}}
+ol.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s}
+ol.steps li{counter-increment:s;border-top:2px solid var(--accent);padding-top:12px}
+ol.steps li::before{content:"Step " counter(s);display:block;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+ol.steps b{display:block;font-family:var(--head);font-size:18px;margin-bottom:4px}
+ol.steps span{color:var(--muted);font-size:14px}
+@media(max-width:820px){ol.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){ol.steps{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:820px){.two{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+.li:last-child{border-bottom:0}
+.li .grow{flex:1;min-width:0}
+.li .grow b{display:block;overflow-wrap:anywhere}
+.li small{color:var(--muted)}
+.empty{padding:22px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
+.dateblk{width:48px;flex:none;text-align:center;border:1px solid var(--line);border-radius:8px;padding:4px 0;background:var(--surface)}
+.dateblk b{display:block;font-family:var(--head);font-size:20px;line-height:1.1}
+.dateblk small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--warm)}
+
+/* communities */
+.page-h{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-h h1{font-size:clamp(28px,4vw,40px)}
+.tools{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.tools input,.tools select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+@media(max-width:640px){.tools{grid-template-columns:1fr 1fr}.tools input{grid-column:1/-1}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h3{font-size:19px;overflow-wrap:anywhere}
+.card h3 button{all:unset;cursor:pointer}
+.card h3 button:hover{color:var(--accent);text-decoration:underline}
+.card .meta{font-size:13px;color:var(--muted)}
+.card .desc{font-size:14px;flex:1}
+.meter{height:6px;background:var(--bg);border-radius:9px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter.full i{background:var(--warm)}
+.cfoot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cfoot span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags em{font-style:normal;font-size:12px;background:var(--bg);border-radius:6px;padding:2px 8px;color:var(--muted)}
+
+/* detail */
+.dhead{display:flex;gap:16px;align-items:start;justify-content:space-between;flex-wrap:wrap;margin:14px 0 20px}
+.dhead h1{font-size:clamp(26px,4vw,38px)}
+.dtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.dtabs button{border:0;background:none;padding:10px 14px;cursor:pointer;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.dtabs button.on{color:var(--accent);border-color:var(--accent)}
+.chat{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;max-height:420px;overflow-y:auto}
+.msg{max-width:78%;min-width:0}
+.msg small{display:block;color:var(--muted);font-size:12px}
+.msg p{background:var(--bg);padding:8px 12px;border-radius:10px;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end}.msg.me p{background:var(--accent);color:var(--accent-ink)}.msg.me small{text-align:right}
+.send{display:flex;gap:8px;margin-top:10px}
+.send input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.locked{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:30px;text-align:center;color:var(--muted)}
+.ann{background:var(--accent-soft);color:var(--ink);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:14px}
+.ann b{color:var(--accent)}
+
+/* overlay */
+.ov{position:fixed;inset:0;z-index:40;background:rgba(5,12,10,.55);display:grid;place-items:center;padding:16px}
+.ov .panel{width:100%;max-width:520px;max-height:100%;overflow-y:auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:9px;font-weight:500;max-width:90vw}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:500;font-size:14px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ev{display:flex;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0;flex-wrap:wrap}
+.ev .grow{flex:1;min-width:200px}
+.ev h3{font-size:18px;margin-bottom:2px}
+.evs{display:flex;flex-direction:column;gap:12px}
+details{border-bottom:1px solid var(--line);padding:14px 0}
+summary{cursor:pointer;font-weight:700}
+details p{color:var(--muted);margin-top:8px;max-width:70ch}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:16px}
+.rules div{border-left:3px solid var(--accent);padding-left:14px}
+.rules b{display:block;font-family:var(--head);font-size:17px;margin-bottom:3px}
+.rules span{color:var(--muted);font-size:14px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 16px;margin:0}
+.kv dt{color:var(--muted);font-size:13px}.kv dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.badge-demo{font-size:12px;background:var(--warm-soft);color:var(--warm);border-radius:6px;padding:3px 9px;font-weight:700}
+</style>
+
+<div id="root"></div>
+<div id="layer"></div>
+
+<script>
+(function(){
+var UNIS=["Jadavpur University","IIT Kharagpur","University of Calcutta","NIT Durgapur","Presidency University","Other"];
+var BRANCHES=["CSE","ECE","Mechanical","Civil","Electrical","Physics","Mathematics","Economics","Literature"];
+var YEARS=["1st year","2nd year","3rd year","4th year"];
+var COMMS=[
+ {id:1,name:"JU Coders Circle",uni:"Jadavpur University",branch:"CSE",year:"All years",type:"public",members:48,owner:"riya_d",desc:"Weekly problem-solving nights, internship referrals and open-source sprints.",tags:["DSA","Web","Interviews"]},
+ {id:2,name:"KGP Robotics Lab",uni:"IIT Kharagpur",branch:"ECE",year:"2nd year",type:"private",members:31,owner:"arjun_k",desc:"Build team for the inter-IIT robotics event. Share a short project to get in.",tags:["Arduino","ROS","Embedded"]},
+ {id:3,name:"Calcutta Econ Reading Room",uni:"University of Calcutta",branch:"Economics",year:"3rd year",type:"public",members:60,owner:"sneha_m",desc:"Paper discussions and exam-season study pairs. Currently full.",tags:["Micro","Econometrics"]},
+ {id:4,name:"NITD Civil Study Group",uni:"NIT Durgapur",branch:"Civil",year:"2nd year",type:"public",members:22,owner:"tanmoy_b",desc:"Notes swap for Structural Analysis and Fluid Mechanics, plus site-visit planning.",tags:["Notes","GATE"]},
+ {id:5,name:"Presidency Poets & Prose",uni:"Presidency University",branch:"Literature",year:"All years",type:"private",members:17,owner:"ananya_s",desc:"Small writing workshop. Members read each other's drafts every Sunday.",tags:["Writing","Workshop"]},
+ {id:6,name:"Mech Freshers Hub",uni:"Jadavpur University",branch:"Mechanical",year:"1st year",type:"public",members:39,owner:"debu_p",desc:"Questions on subjects, labs and hostel life, answered by seniors.",tags:["Freshers","Mentors"]},
+ {id:7,name:"Math Olympiad Alumni Prep",uni:"IIT Kharagpur",branch:"Mathematics",year:"2nd year",type:"private",members:12,owner:"kabir_r",desc:"Problem sets and proofs. Admin approval needed.",tags:["Proofs","Analysis"]},
+ {id:8,name:"Physics Lab Partners",uni:"Presidency University",branch:"Physics",year:"3rd year",type:"public",members:28,owner:"mitali_g",desc:"Find lab partners, share error-analysis templates and viva questions.",tags:["Lab","Viva"]},
+ {id:9,name:"Power Systems Circle",uni:"NIT Durgapur",branch:"Electrical",year:"3rd year",type:"public",members:55,owner:"sourav_n",desc:"Load-flow, protection and machines. Past papers and doubt sessions.",tags:["Machines","Past papers"]}
+];
+var EVENTS=[
+ {id:1,title:"CampusHack 24-hour Hackathon",cat:"Hackathon",d:"14",m:"Nov",time:"9:00 AM",place:"Jadavpur University, Salt Lake Campus",going:212},
+ {id:2,title:"Intro to Machine Learning Workshop",cat:"Workshop",d:"16",m:"Nov",time:"4:30 PM",place:"IIT Kharagpur, Nalanda Complex",going:96},
+ {id:3,title:"Inter-College Football Cup, Round 1",cat:"Sports",d:"19",m:"Nov",time:"3:00 PM",place:"Kolkata Maidan",going:340},
+ {id:4,title:"Winter Fest: Open-mic and Food Stalls",cat:"Fest",d:"22",m:"Nov",time:"5:00 PM",place:"Presidency University Lawns",going:518},
+ {id:5,title:"Group Study Night: GATE Civil",cat:"Study",d:"24",m:"Nov",time:"7:00 PM",place:"Online (voice room)",going:41},
+ {id:6,title:"Resume Review with Alumni",cat:"Workshop",d:"28",m:"Nov",time:"11:00 AM",place:"NIT Durgapur Auditorium",going:73}
+];
+var SEED_MSGS=[["riya_d","Anyone up for the graph problems tonight?"],["amit_c","Yes, 9 PM works for me. I will bring the shortest-path set."],["sneha_m","Posting the interview experience doc in a bit."]];
+var S={user:null,mode:"in",view:"home",open:null,dtab:"chat",q:"",type:"all",branch:"all",cat:"All",
+ joined:{},pending:{},owned:{},rsvp:{},msgs:{},reqs:{},extra:[]};
+S.joined[1]="member";S.joined[6]="member";
+S.msgs[1]=SEED_MSGS.slice();
+
+var $=function(s){return document.querySelector(s)};
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function all(){return COMMS.concat(S.extra)}
+function find(id){return all().filter(function(c){return c.id===id})[0]}
+function count(c){return c.members}
+var toastT;
+function toast(t){var d=document.createElement("div");d.className="toast";d.textContent=t;$("#layer").appendChild(d);clearTimeout(toastT);toastT=setTimeout(function(){d.remove()},2200)}
+
+var LOGO='<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="16" r="9" fill="none" stroke="var(--accent)" stroke-width="3"/><circle cx="20" cy="16" r="9" fill="none" stroke="var(--warm)" stroke-width="3"/></svg>';
+
+/* ---------- views ---------- */
+function authView(){
+  var up=S.mode==="up";
+  return '<div class="auth"><div class="pitch"><a class="logo" href="#home">'+LOGO+'<span>CollegeCircle</span></a>'+
+  '<h1>Your campus. Your circle.</h1><p>Small groups of up to 60 students from your university, branch and year. Join a public circle in one tap, or request a spot in a private one.</p>'+
+  '<div class="circles-art"><i></i><i></i><i></i></div></div>'+
+  '<div class="panel"><div class="seg" role="tablist"><button data-a="mode" data-v="in" class="'+(up?'':'on')+'">Sign in</button><button data-a="mode" data-v="up" class="'+(up?'on':'')+'">Sign up</button></div>'+
+  '<form id="authform" novalidate>'+
+  '<div class="field"><label for="u">Username</label><input id="u" autocomplete="username" placeholder="e.g. riya_d"></div>'+
+  (up?'<div class="field"><label for="em">College email</label><input id="em" type="email" placeholder="you@university.ac.in"></div>':'')+
+  '<div class="field"><label for="p">Password</label><input id="p" type="password" autocomplete="'+(up?'new-password':'current-password')+'" placeholder="'+(up?'At least 8 characters':'Your password')+'"></div>'+
+  (up?'<div class="field"><label for="uni">University</label><select id="uni">'+UNIS.map(function(x){return'<option>'+x+'</option>'}).join('')+'</select></div>'+
+   '<div class="row2"><div class="field"><label for="br">Branch</label><select id="br">'+BRANCHES.map(function(x){return'<option>'+x+'</option>'}).join('')+'</select></div>'+
+   '<div class="field"><label for="yr">Year</label><select id="yr">'+YEARS.map(function(x){return'<option>'+x+'</option>'}).join('')+'</select></div></div>':'')+
+  '<div class="err" id="err" role="alert"></div>'+
+  '<button class="btn primary" style="width:100%" type="submit">'+(up?'Create account':'Sign in')+'</button></form>'+
+  '<p class="note">Preview only: any details work here and nothing is saved. In the real site, passwords are hashed and stored in the server database.</p></div></div>';
+}
+
+function header(){
+  var tabs=[["home","Home"],["communities","Communities"],["events","Events"],["about","About"]];
+  return '<header class="top"><div class="bar"><a class="logo" href="#home">'+LOGO+'<span>CollegeCircle</span></a>'+
+  '<nav class="tabs" aria-label="Main">'+tabs.map(function(t){return'<a href="#'+t[0]+'" class="'+(S.view===t[0]?'on':'')+'">'+t[1]+'</a>'}).join('')+'</nav>'+
+  '<a href="#account" class="acct" aria-label="My account"><span class="av">'+esc(S.user.name.charAt(0).toUpperCase())+'</span><b>'+esc(S.user.name)+'</b></a></div></header>';
+}
+
+function actionBtn(c){
+  var id=c.id;
+  if(S.joined[id]) return '<button class="btn sm" data-a="open" data-id="'+id+'">Open chat</button>';
+  if(S.pending[id]) return '<button class="btn sm" disabled>Request sent</button>';
+  if(count(c)>=60) return '<button class="btn sm" data-a="wait" data-id="'+id+'">Join waitlist</button>';
+  if(c.type==="private") return '<button class="btn sm" data-a="join" data-id="'+id+'">Request to join</button>';
+  return '<button class="btn sm primary" data-a="join" data-id="'+id+'">Join</button>';
+}
+function card(c){
+  var n=count(c),full=n>=60;
+  return '<article class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><h3><button data-a="open" data-id="'+c.id+'">'+esc(c.name)+'</button></h3>'+
+  '<span class="pill '+(c.type==="public"?'pub">Public':'priv">Private')+'</span></div>'+
+  '<div class="meta">'+esc(c.uni)+' &middot; '+esc(c.branch)+' &middot; '+esc(c.year)+'</div>'+
+  '<p class="desc">'+esc(c.desc)+'</p><div class="tags">'+c.tags.map(function(t){return'<em>'+esc(t)+'</em>'}).join('')+'</div>'+
+  '<div class="meter'+(full?' full':'')+'"><i style="width:'+Math.min(100,n/60*100)+'%"></i></div>'+
+  '<div class="cfoot"><span>'+n+' / 60 members'+(full?' &middot; Full':'')+'</span>'+actionBtn(c)+'</div></article>';
+}
+function evRow(e,compact){
+  var going=S.rsvp[e.id];
+  if(compact) return '<div class="li"><div class="dateblk"><b>'+e.d+'</b><small>'+e.m+'</small></div><div class="grow"><b>'+esc(e.title)+'</b><small>'+e.time+' &middot; '+esc(e.place)+'</small></div></div>';
+  return '<div class="ev"><div class="dateblk"><b>'+e.d+'</b><small>'+e.m+'</small></div><div class="grow"><h3>'+esc(e.title)+'</h3><div class="muted" style="font-size:14px">'+e.time+' &middot; '+esc(e.place)+'</div>'+
+  '<div style="margin-top:6px"><span class="pill priv">'+e.cat+'</span> <span class="muted" style="font-size:13px">'+(e.going+(going?1:0))+' going</span></div></div>'+
+  '<button class="btn '+(going?'':'primary')+'" data-a="rsvp" data-id="'+e.id+'">'+(going?'Going ✓':'RSVP')+'</button></div>';
+}
+
+function homeView(){
+  var mine=all().filter(function(c){return S.joined[c.id]});
+  var sugg=all().filter(function(c){return !S.joined[c.id]&&count(c)<60&&c.type==="public"&&(c.branch===S.user.branch||c.uni===S.user.uni)}).slice(0,3);
+  if(!sugg.length) sugg=all().filter(function(c){return !S.joined[c.id]&&count(c)<60}).slice(0,3);
+  var students=all().reduce(function(a,c){return a+c.members},0);
+  return '<section class="hero"><div><span class="label">Welcome, '+esc(S.user.name)+'</span><h1 style="margin-top:10px">Find the 60 people who get your campus life.</h1>'+
+  '<p class="lead">CollegeCircle groups students by university, branch and year into small communities where conversations stay useful: doubts, notes, projects and plans.</p>'+
+  '<div class="cta"><a class="btn primary" href="#communities">Browse communities</a><a class="btn" href="#events">See events</a></div>'+
+  '<div class="stats"><div><b>'+all().length+'</b><span>sample circles</span></div><div><b>'+students+'</b><span>sample members</span></div><div><b>60</b><span>members max per circle</span></div></div></div>'+
+  '<div class="venn" aria-hidden="true"><div class="a">Branch</div><div class="b">University</div><div class="c">Your circle</div></div></section>'+
+  '<section class="blk"><div class="sec-h"><h2>How it works</h2></div><ol class="steps">'+
+  '<li><b>Create your account</b><span>Username, password, and your university, branch and year.</span></li>'+
+  '<li><b>Find a circle</b><span>Filter by university, branch or interest. Public or private.</span></li>'+
+  '<li><b>Join or request</b><span>Public circles open instantly. Private ones need an admin to approve you.</span></li>'+
+  '<li><b>Talk and meet</b><span>Chat in your circle and RSVP to campus events.</span></li></ol></section>'+
+  '<section class="blk two"><div><div class="sec-h"><h2>Your circles</h2><a href="#communities" class="muted">All communities</a></div>'+
+  (mine.length?'<div class="list">'+mine.map(function(c){return'<div class="li"><div class="grow"><b>'+esc(c.name)+'</b><small>'+count(c)+' / 60 &middot; '+esc(c.branch)+'</small></div><button class="btn sm" data-a="open" data-id="'+c.id+'">Open</button></div>'}).join('')+'</div>':'<div class="empty">You have not joined a circle yet.</div>')+'</div>'+
+  '<div><div class="sec-h"><h2>Coming up</h2><a href="#events" class="muted">All events</a></div><div class="list">'+EVENTS.slice(0,3).map(function(e){return evRow(e,true)}).join('')+'</div></div></section>'+
+  '<section class="blk"><div class="sec-h"><h2>Suggested for you</h2><span class="muted">Based on '+esc(S.user.branch)+' at '+esc(S.user.uni)+'</span></div><div class="grid">'+sugg.map(card).join('')+'</div></section>';
+}
+
+function filtered(){
+  var q=S.q.trim().toLowerCase();
+  return all().filter(function(c){
+    if(S.type!=="all"&&c.type!==S.type) return false;
+    if(S.branch!=="all"&&c.branch!==S.branch) return false;
+    if(q&&(c.name+" "+c.uni+" "+c.desc+" "+c.tags.join(" ")).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+function gridHTML(){
+  var l=filtered();
+  return l.length?l.map(card).join(''):'<div class="empty" style="grid-column:1/-1">No circles match. Try another branch, or create one.</div>';
+}
+function commView(){
+  return '<div class="page-h"><div><span class="label">Communities</span><h1>Find your circle</h1></div><button class="btn primary" data-a="create">+ Create a circle</button></div>'+
+  '<div class="tools"><input id="q" type="search" placeholder="Search name, university or topic" value="'+esc(S.q)+'" aria-label="Search">'+
+  '<select id="ft" aria-label="Type"><option value="all">All types</option><option value="public"'+(S.type==="public"?' selected':'')+'>Public</option><option value="private"'+(S.type==="private"?' selected':'')+'>Private</option></select>'+
+  '<select id="fb" aria-label="Branch"><option value="all">All branches</option>'+BRANCHES.map(function(b){return'<option'+(S.branch===b?' selected':'')+'>'+b+'</option>'}).join('')+'</select></div>'+
+  '<div class="grid" id="grid">'+gridHTML()+'</div>';
+}
+
+function detailView(){
+  var c=find(S.open); if(!c) return commView();
+  var member=!!S.joined[c.id], admin=S.joined[c.id]==="owner"||S.joined[c.id]==="admin";
+  var rq=S.reqs[c.id]||[];
+  var tabs=[["chat","Chat"],["members","Members"]].concat(admin&&c.type==="private"?[["requests","Requests ("+rq.length+")"]]:[]);
+  var body="";
+  if(S.dtab==="chat"){
+    if(!member) body='<div class="locked"><b>Join to see the chat</b><p style="margin:6px 0 14px">'+(c.type==="private"?'This is a private circle. An admin reviews each request.':'Public circles open instantly.')+'</p>'+actionBtn(c)+'</div>';
+    else{
+      var ms=S.msgs[c.id]||[];
+      body='<div class="ann"><b>Pinned by admin:</b> Be kind, stay on topic, no spam. Max 60 members keeps this readable.</div>'+
+      '<div class="chat" id="chat">'+(ms.length?ms.map(function(m){var me=m[0]===S.user.name;return'<div class="msg'+(me?' me':'')+'"><small>'+esc(m[0])+'</small><p>'+esc(m[1])+'</p></div>'}).join(''):'<div class="muted">No messages yet. Say hello.</div>')+'</div>'+
+      '<form class="send" id="sendf"><input id="mt" placeholder="Message this circle" aria-label="Message" autocomplete="off"><button class="btn primary" type="submit">Send</button></form>';
+    }
+  } else if(S.dtab==="members"){
+    var names=[c.owner,"amit_c","sneha_m","priya_v","rohan_t"];
+    if(member&&names.indexOf(S.user.name)<0) names.push(S.user.name);
+    body='<div class="list" style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 16px">'+names.map(function(n,i){return'<div class="li"><span class="av">'+esc(n.charAt(0).toUpperCase())+'</span><div class="grow"><b>'+esc(n)+'</b></div><span class="pill '+(i===0?'pub':'')+'" style="'+(i===0?'':'color:var(--muted)')+'">'+(i===0?'Owner':n===S.user.name?'You':'Member')+'</span></div>'}).join('')+
+    '<div class="li muted">+ '+Math.max(0,count(c)-names.length)+' more</div></div>';
+  } else {
+    body=rq.length?'<div class="list" style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 16px">'+rq.map(function(r,i){return'<div class="li"><span class="av">'+esc(r.charAt(0).toUpperCase())+'</span><div class="grow"><b>'+esc(r)+'</b><small>wants to join</small></div><button class="btn sm primary" data-a="approve" data-i="'+i+'">Approve</button><button class="btn sm" data-a="reject" data-i="'+i+'">Reject</button></div>'}).join('')+'</div>':'<div class="empty">No pending requests.</div>';
+  }
+  return '<button class="btn sm" data-a="back">← All communities</button>'+
+  '<div class="dhead"><div><span class="pill '+(c.type==="public"?'pub">Public':'priv">Private')+'</span><h1 style="margin-top:8px">'+esc(c.name)+'</h1><p class="muted" style="margin-top:6px">'+esc(c.uni)+' &middot; '+esc(c.branch)+' &middot; '+esc(c.year)+'</p><p style="margin-top:10px;max-width:60ch">'+esc(c.desc)+'</p></div>'+
+  '<div style="text-align:right;min-width:150px"><div class="muted" style="font-size:13px;margin-bottom:6px;font-variant-numeric:tabular-nums">'+count(c)+' / 60 members</div><div class="meter"><i style="width:'+count(c)/60*100+'%"></i></div>'+
+  (member&&S.joined[c.id]==="member"?'<button class="btn sm" style="margin-top:10px" data-a="leave" data-id="'+c.id+'">Leave circle</button>':'')+'</div></div>'+
+  '<div class="dtabs">'+tabs.map(function(t){return'<button data-a="dtab" data-v="'+t[0]+'" class="'+(S.dtab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div>'+body;
+}
+
+function eventsView(){
+  var cats=["All","Hackathon","Workshop","Sports","Fest","Study"];
+  var l=EVENTS.filter(function(e){return S.cat==="All"||e.cat===S.cat});
+  return '<div class="page-h"><div><span class="label">Events</span><h1>On campus soon</h1></div></div>'+
+  '<div class="chips">'+cats.map(function(c){return'<button class="chip '+(S.cat===c?'on':'')+'" data-a="cat" data-v="'+c+'">'+c+'</button>'}).join('')+'</div>'+
+  '<div class="evs">'+l.map(function(e){return evRow(e,false)}).join('')+'</div>';
+}
+
+function aboutView(){
+  var faq=[["Why only 60 members?","Past a certain size, group chats turn into noise. A cap of 60 keeps every circle small enough that people know each other."],
+  ["What is the difference between public and private?","Anyone can join a public circle straight away. For a private circle you send a request, and the owner or an admin approves or rejects it."],
+  ["Is my password safe?","Passwords are hashed before they reach the database, so nobody, including the site owner, can read them."],
+  ["What if a circle is full?","Join its waitlist, or look for a similar circle in your branch. You can also start your own."]];
+  return '<div class="page-h"><div><span class="label">About</span><h1>Small groups, real conversations</h1></div></div>'+
+  '<p style="max-width:62ch;font-size:17px;color:var(--muted)">CollegeCircle started with a simple problem: campus group chats are either huge and noisy or invite-only and hard to find. We cap each circle at 60 students and organise them by university, branch and year, so finding the right people takes a minute.</p>'+
+  '<section class="blk"><div class="sec-h"><h2>Community guidelines</h2></div><div class="rules">'+
+  '<div><b>Be respectful</b><span>No harassment, hate or personal attacks.</span></div><div><b>Stay on topic</b><span>Keep each circle focused on what it was made for.</span></div>'+
+  '<div><b>Protect privacy</b><span>Do not share anyone else\'s personal details.</span></div><div><b>Report problems</b><span>Admins can remove members. Reports go to moderators.</span></div></div></section>'+
+  '<section class="blk"><div class="sec-h"><h2>Questions</h2></div>'+faq.map(function(f){return'<details><summary>'+f[0]+'</summary><p>'+f[1]+'</p></details>'}).join('')+'</section>'+
+  '<section class="blk"><div class="sec-h"><h2>Contact</h2></div><p class="muted">hello@collegecircle.example (sample address for this preview)</p></section>';
+}
+
+function accountView(){
+  var u=S.user;
+  var mine=all().filter(function(c){return S.joined[c.id]});
+  var pend=all().filter(function(c){return S.pending[c.id]});
+  var ev=EVENTS.filter(function(e){return S.rsvp[e.id]});
+  var dark=document.documentElement.getAttribute("data-theme")==="dark";
+  return '<div class="page-h"><div><span class="label">My account</span><h1>'+esc(u.name)+'</h1></div><button class="btn" data-a="logout">Sign out</button></div>'+
+  '<div class="two"><div class="panel"><h3 style="margin-bottom:16px">Profile</h3><dl class="kv"><dt>Username</dt><dd>'+esc(u.name)+'</dd><dt>Email</dt><dd>'+esc(u.email)+'</dd><dt>University</dt><dd>'+esc(u.uni)+'</dd><dt>Branch</dt><dd>'+esc(u.branch)+'</dd><dt>Year</dt><dd>'+esc(u.year)+'</dd></dl>'+
+  '<div style="margin-top:20px"><button class="btn sm" data-a="theme">Switch to '+(dark?'light':'dark')+' mode</button></div></div>'+
+  '<div class="panel"><h3 style="margin-bottom:6px">My circles</h3>'+(mine.length?'<div class="list">'+mine.map(function(c){return'<div class="li"><div class="grow"><b>'+esc(c.name)+'</b><small>'+(S.joined[c.id]==="owner"?'Owner':'Member')+'</small></div><button class="btn sm" data-a="open" data-id="'+c.id+'">Open</button></div>'}).join('')+'</div>':'<div class="empty">No circles yet.</div>')+
+  '<h3 style="margin:22px 0 6px">Join requests</h3>'+(pend.length?'<div class="list">'+pend.map(function(c){return'<div class="li"><div class="grow"><b>'+esc(c.name)+'</b><small>Waiting for admin approval</small></div></div>'}).join('')+'</div>':'<div class="muted">None pending.</div>')+
+  '<h3 style="margin:22px 0 6px">Events I am going to</h3>'+(ev.length?'<div class="list">'+ev.map(function(e){return evRow(e,true)}).join('')+'</div>':'<div class="muted">RSVP to an event and it appears here.</div>')+'</div></div>';
+}
+
+function createDialog(){
+  $("#layer").innerHTML='<div class="ov" data-a="closeov"><div class="panel" role="dialog" aria-label="Create a circle"><h2 style="font-size:22px;margin-bottom:16px">Create a circle</h2><form id="cf" novalidate>'+
+  '<div class="field"><label for="cn">Name</label><input id="cn" placeholder="e.g. CSE 2nd Year Study Hall"></div>'+
+  '<div class="field"><label for="cd">Description</label><textarea id="cd" rows="3" placeholder="What is this circle for?"></textarea></div>'+
+  '<div class="row2"><div class="field"><label for="cb">Branch</label><select id="cb">'+BRANCHES.map(function(b){return'<option'+(b===S.user.branch?' selected':'')+'>'+b+'</option>'}).join('')+'</select></div>'+
+  '<div class="field"><label for="ct">Type</label><select id="ct"><option value="public">Public: anyone can join</option><option value="private">Private: admin approves</option></select></div></div>'+
+  '<div class="err" id="cerr" role="alert"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" type="button" data-a="closeov2">Cancel</button><button class="btn primary" type="submit">Create</button></div></form></div></div>';
+  setTimeout(function(){var i=$("#cn");if(i)i.focus()},0);
+}
+
+/* ---------- render ---------- */
+function render(){
+  var root=$("#root");
+  if(!S.user){root.innerHTML='<div class="wrap">'+authView()+'</div>';return}
+  var v;
+  if(S.view==="communities") v=S.open?detailView():commView();
+  else if(S.view==="events") v=eventsView();
+  else if(S.view==="about") v=aboutView();
+  else if(S.view==="account") v=accountView();
+  else v=homeView();
+  root.innerHTML=header()+'<main class="wrap">'+v+'</main>';
+  var ch=$("#chat"); if(ch) ch.scrollTop=ch.scrollHeight;
+}
+function route(){
+  var h=(location.hash||"").replace("#","");
+  if(["home","communities","events","about","account"].indexOf(h)<0) h="home";
+  if(h!==S.view) S.open=(h==="communities")?S.open:null;
+  S.view=h; render(); window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- actions ---------- */
+function openC(id){S.open=id;S.dtab="chat";if(S.view!=="communities"){S.view="communities";try{history.replaceState(null,"","#communities")}catch(e){}}render();window.scrollTo(0,0)}
+function join(id){
+  var c=find(id); if(!c) return;
+  if(c.type==="public"){ if(count(c)>=60){toast("This circle is full");return}
+    c.members++;S.joined[id]="member";S.msgs[id]=S.msgs[id]||SEED_MSGS.slice(0,2);toast("You joined "+c.name);}
+  else{S.pending[id]=true;toast("Request sent. An admin will review it.");
+    setTimeout(function(){ if(S.pending[id]&&!S.joined[id]){ delete S.pending[id]; if(count(c)<60){c.members++;S.joined[id]="member";S.msgs[id]=S.msgs[id]||SEED_MSGS.slice(0,2);toast("Approved: you are now in "+c.name);} render(); } },9000);}
+  render();
+}
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-a]"); if(!t) return;
+  var a=t.getAttribute("data-a"), id=+t.getAttribute("data-id"), v=t.getAttribute("data-v");
+  if(a==="closeov"){ if(e.target===t) $("#layer").innerHTML=""; return }
+  if(a==="closeov2"){$("#layer").innerHTML="";return}
+  if(a==="mode"){S.mode=v;render();return}
+  if(a==="open"){openC(id);return}
+  if(a==="back"){S.open=null;render();return}
+  if(a==="join"){join(id);return}
+  if(a==="wait"){toast("You are on the waitlist for "+find(id).name);return}
+  if(a==="leave"){var c=find(id);c.members--;delete S.joined[id];toast("You left "+c.name);render();return}
+  if(a==="dtab"){S.dtab=v;render();return}
+  if(a==="cat"){S.cat=v;render();return}
+  if(a==="rsvp"){S.rsvp[id]=!S.rsvp[id];toast(S.rsvp[id]?"You are going":"RSVP removed");render();return}
+  if(a==="create"){createDialog();return}
+  if(a==="approve"||a==="reject"){
+    var cc=find(S.open),i=+t.getAttribute("data-i");S.reqs[cc.id].splice(i,1);
+    if(a==="approve"){ if(count(cc)<60){cc.members++;toast("Approved")}else toast("Circle is full") } else toast("Rejected");
+    render();return}
+  if(a==="theme"){var d=document.documentElement.getAttribute("data-theme")==="dark";document.documentElement.setAttribute("data-theme",d?"light":"dark");render();return}
+  if(a==="logout"){S.user=null;S.mode="in";S.open=null;render();return}
+});
+document.addEventListener("input",function(e){
+  if(e.target.id==="q"){S.q=e.target.value;var g=$("#grid");if(g)g.innerHTML=gridHTML()}
+});
+document.addEventListener("change",function(e){
+  if(e.target.id==="ft"){S.type=e.target.value;var g=$("#grid");if(g)g.innerHTML=gridHTML()}
+  if(e.target.id==="fb"){S.branch=e.target.value;var g2=$("#grid");if(g2)g2.innerHTML=gridHTML()}
+});
+document.addEventListener("submit",function(e){
+  e.preventDefault();
+  var f=e.target.id;
+  if(f==="authform"){
+    var up=S.mode==="up",u=$("#u").value.trim(),p=$("#p").value,er=$("#err");
+    if(!u){er.textContent="Enter a username.";return}
+    if(up){
+      if(u.length<3){er.textContent="Username needs at least 3 characters.";return}
+      var em=$("#em").value.trim(); if(!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Enter a valid email address.";return}
+      if(p.length<8){er.textContent="Password needs at least 8 characters.";return}
+      S.user={name:u,email:em,uni:$("#uni").value,branch:$("#br").value,year:$("#yr").value};
+    } else {
+      if(!p){er.textContent="Enter your password.";return}
+      S.user={name:u,email:u+"@university.ac.in",uni:"Jadavpur University",branch:"CSE",year:"2nd year"};
+    }
+    location.hash="#home"; S.view="home"; render(); toast("Welcome, "+u); return;
+  }
+  if(f==="sendf"){
+    var i=$("#mt"),t=i.value.trim(); if(!t) return;
+    (S.msgs[S.open]=S.msgs[S.open]||[]).push([S.user.name,t]); render(); var n=$("#mt"); if(n) n.focus(); return;
+  }
+  if(f==="cf"){
+    var nm=$("#cn").value.trim(),er2=$("#cerr");
+    if(nm.length<3){er2.textContent="Give your circle a name of at least 3 characters.";return}
+    var nid=100+S.extra.length;
+    S.extra.push({id:nid,name:nm,uni:S.user.uni,branch:$("#cb").value,year:S.user.year,type:$("#ct").value,members:1,owner:S.user.name,desc:$("#cd").value.trim()||"A new circle for "+S.user.uni+".",tags:["New"]});
+    S.joined[nid]="owner"; S.msgs[nid]=[]; S.reqs[nid]=["kabir_r","meera_j","tuhin_s"];
+    $("#layer").innerHTML=""; S.q="";S.type="all";S.branch="all"; openC(nid); toast("Circle created. You are the owner."); return;
+  }
+});
+route();
+})();
+</script>
+
+</body></html>
